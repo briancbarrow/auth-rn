@@ -15,13 +15,30 @@ onButtonPress() {
     this.setState({ signInError: '', loggingIn: true })
     const { email, password } = this.state;
     firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(this.onLoginSuccess.bind(this))
         .catch(() => {
+            console.log('testing');
             firebase.auth().createUserWithEmailAndPassword(email, password)
-                .catch(() => {
-                    this.setState({ signInError: 'Authentication Failed' });
+                .then(this.onLoginSuccess.bind(this))
+                .catch((error) => {
+                    this.onLoginError.bind(this);
+                    this.onLoginError(error.message);
                 });
         });
 };
+
+onLoginError(errorMessage) {
+    this.setState({ signInError: errorMessage, loggingIn: false })
+}
+
+onLoginSuccess() {
+    this.setState({
+        email: "",
+        password: "",
+        loggingIn: false,
+        signInError: ""
+    })
+}
 
 renderButton() {
     if(this.state.loggingIn) {
@@ -33,6 +50,7 @@ renderButton() {
 }
 
     render() {
+        console.log('Auth state: ', this.state)
         return (
             <Card>
                 <CardSection>
